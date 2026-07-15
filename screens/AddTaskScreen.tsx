@@ -1,10 +1,16 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useState } from "react";
 import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -19,6 +25,7 @@ export default function AddTaskScreen() {
   const [date, setDate] = useState<Date>(new Date());
 
   const [isPickerVisible, setPickerVisibility] = useState(false);
+  const isFormValid = title.trim().length > 0 && description.trim().length > 0;
 
   const showPicker = () => setPickerVisibility(true);
   const hidePicker = () => setPickerVisibility(false);
@@ -30,108 +37,176 @@ export default function AddTaskScreen() {
 
   const addTask = useTaskStore((state) => state.addTask);
   const handleAddBtn = () => {
-    if (!title) {
-      return;
-    }
-    if (!description) {
-      return;
-    }
-    if (!date) {
-      return;
-    }
+    if (!isFormValid) return;
 
     addTask(title, description, date);
     navigation.navigate("Home");
   };
 
   return (
-    <View>
-      <View style={styles.row}>
-        <Text style={styles.label}>Name:</Text>
-        <TextInput
-          style={styles.input}
-          value={title}
-          onChangeText={(t) => setTitle(t)}
-        ></TextInput>
-      </View>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <Text style={styles.screenTitle}>New Task</Text>
 
-      <View style={styles.row}>
-        <Text style={styles.label}>Description:</Text>
-        <TextInput
-          style={styles.input}
-          value={description}
-          onChangeText={(t) => setDescription(t)}
-        ></TextInput>
-      </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>Task Name</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="What needs to be done?"
+              placeholderTextColor="#9CA3AF"
+              value={title}
+              onChangeText={setTitle}
+            />
+          </View>
 
-      <View style={styles.row}>
-        <Text style={styles.label}>Due date:</Text>
-        <TouchableOpacity style={styles.input} onPress={showPicker}>
-          <Text style={styles.dateText}>{formatDate(date.toISOString())}</Text>
-        </TouchableOpacity>
-      </View>
+          <View style={styles.row}>
+            <Text style={styles.label}>Description</Text>
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              placeholder="Add some details about this task..."
+              placeholderTextColor="#9CA3AF"
+              value={description}
+              onChangeText={setDescription}
+              multiline={true}
+              numberOfLines={4}
+              textAlignVertical="top"
+            />
+          </View>
 
-      <DateTimePickerModal
-        isVisible={isPickerVisible}
-        mode="datetime"
-        date={date}
-        onConfirm={handleConfirm}
-        onCancel={hidePicker}
-        locale="en"
-      />
+          <View style={styles.row}>
+            <Text style={styles.label}>Due Date</Text>
+            <TouchableOpacity style={styles.dateSelector} onPress={showPicker}>
+              <Ionicons name="calendar-outline" size={20} color="#4B5563" />
+              <Text style={styles.dateText}>
+                {formatDate(date.toISOString())}
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-      <TouchableOpacity style={styles.btn} onPress={handleAddBtn}>
-        <Text style={styles.btnText}>Add task</Text>
-      </TouchableOpacity>
-    </View>
+          <DateTimePickerModal
+            isVisible={isPickerVisible}
+            mode="datetime"
+            date={date}
+            onConfirm={handleConfirm}
+            onCancel={hidePicker}
+            locale="en"
+          />
+
+          <TouchableOpacity
+            style={[styles.btn, !isFormValid && styles.btnDisabled]}
+            onPress={handleAddBtn}
+            disabled={!isFormValid}
+          >
+            <Text style={styles.btnText}>Create Task</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#F9FAFB",
+  },
+  scrollContainer: {
+    padding: 24,
+    paddingBottom: 40,
+  },
+  screenTitle: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 24,
+  },
   row: {
-    padding: 5,
+    marginBottom: 20,
     width: "100%",
   },
-
   label: {
+    fontSize: 14,
     fontWeight: "600",
-    fontSize: 18,
+    color: "#4B5563",
+    marginBottom: 8,
   },
-
   input: {
-    width: "auto",
-
+    width: "100%",
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    backgroundColor: "#fff",
-
+    borderColor: "#E5E7EB",
+    borderRadius: 10,
+    backgroundColor: "#FFFFFF",
     fontSize: 16,
+    color: "#111827",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.02,
+        shadowRadius: 2,
+      },
+      android: {
+        elevation: 1,
+      },
+    }),
+  },
+  textArea: {
+    height: 100,
+    paddingTop: 12,
+    paddingBottom: 12,
+  },
+  dateSelector: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    width: "100%",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 10,
+    backgroundColor: "#FFFFFF",
   },
   dateText: {
     fontSize: 16,
-    color: "#333",
+    color: "#1F2937",
+    fontWeight: "500",
   },
-
   btn: {
-    alignSelf: "center",
-
-    display: "flex",
+    width: "100%",
+    backgroundColor: "#289efe",
+    paddingVertical: 14,
+    borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
-
-    marginTop: 15,
-    width: "90%",
-    padding: 10,
-    backgroundColor: "#289efe",
-    borderRadius: 10,
+    marginTop: 10,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#289efe",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
   },
-
+  btnDisabled: {
+    backgroundColor: "#9CA3AF",
+    shadowOpacity: 0,
+    elevation: 0,
+    opacity: 0.6,
+  },
   btnText: {
-    color: "#efefef",
-    fontWeight: "500",
-    fontSize: 15,
+    color: "#FFFFFF",
+    fontWeight: "600",
+    fontSize: 16,
   },
 });

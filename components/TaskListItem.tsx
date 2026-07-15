@@ -1,6 +1,6 @@
 import React from "react";
 
-import { StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 import Task from "../types/task";
 import { formatDate } from "../utils";
 
@@ -11,91 +11,130 @@ interface TaskListItemParams {
 const TaskListItem = React.memo(({ task }: TaskListItemParams) => {
   return (
     <View style={styles.listItem}>
-      <Text
-        style={[styles.status, STATUS_STYLES[task.status] || styles.newStatus]}
-      >
-        {task.status}
-      </Text>
-
-      <View style={styles.mainInfo}>
-        <Text style={styles.title}>{task.title}</Text>
-        <Text>{task.description}</Text>
+      {/* Верхний ряд: Заголовок и Статус */}
+      <View style={styles.headerRow}>
+        <Text style={styles.title} numberOfLines={1}>
+          {task.title}
+        </Text>
+        <Text
+          style={[
+            styles.status,
+            STATUS_STYLES[task.status] || styles.newStatus,
+          ]}
+        >
+          {task.status}
+        </Text>
       </View>
 
-      <Text style={styles.dueDate}>Срок: {formatDate(task.dueDate)}</Text>
+      {/* Описание (не бросается в глаза, шрифт чуть меньше и мягче) */}
+      {task.description ? (
+        <Text style={styles.description} numberOfLines={2}>
+          {task.description}
+        </Text>
+      ) : null}
 
-      <Text style={styles.createdDate}>{formatDate(task.createdDate)}</Text>
+      {/* Нижний ряд: Сроки и Дата создания разнесены по сторонам */}
+      <View style={styles.footerRow}>
+        <Text style={styles.dueDate}>Срок: {formatDate(task.deadline)}</Text>
+        <Text style={styles.createdDate}>{formatDate(task.createdDate)}</Text>
+      </View>
     </View>
   );
 });
 
 const styles = StyleSheet.create({
   listItem: {
-    position: "relative",
-    display: "flex",
-    flexDirection: "column",
-    padding: 10,
-    margin: 5,
-
-    backgroundColor: "#fcfcfc",
-    borderColor: "#626262",
-    borderWidth: 1,
+    backgroundColor: "#FFFFFF",
+    padding: 14,
+    marginVertical: 6,
+    marginHorizontal: 12,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.04,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 1,
+      },
+    }),
   },
 
-  mainInfo: {
-    display: "flex",
-    flexDirection: "column",
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+    gap: 8,
   },
 
   title: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: "600",
+    color: "#111827",
+    flex: 1,
+  },
+
+  description: {
+    fontSize: 13,
+    color: "#6B7280",
+    lineHeight: 18,
+    marginBottom: 12,
+  },
+
+  footerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderTopWidth: 1,
+    borderTopColor: "#F3F4F6",
+    paddingTop: 8,
   },
 
   status: {
-    position: "absolute",
-    top: 7,
-    right: 7,
-    padding: 6,
-
-    borderWidth: 1,
-    borderColor: "#858585",
-    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    fontSize: 12,
+    fontWeight: "600",
+    overflow: "hidden",
   },
 
   newStatus: {
-    backgroundColor: "#087eeb",
-    color: "#fefefe",
+    backgroundColor: "#EFF6FF",
+    color: "#1D4ED8",
   },
 
   inProgressStatus: {
-    backgroundColor: "#e4d60b",
+    backgroundColor: "#FFFBEB",
+    color: "#B45309",
   },
 
   completedStatus: {
-    backgroundColor: "#48e777",
-  },
-
-  createdDate: {
-    position: "absolute",
-    bottom: 0,
-    right: 3,
-    padding: 5,
-
-    opacity: 0.6,
-    fontSize: 13,
+    backgroundColor: "#ECFDF5",
+    color: "#047857",
   },
 
   dueDate: {
-    marginTop: 10,
+    fontSize: 12,
+    color: "#4B5563",
+    fontWeight: "500",
+  },
+
+  createdDate: {
+    fontSize: 11,
+    color: "#9CA3AF",
   },
 });
-
-export default TaskListItem;
 
 const STATUS_STYLES: Record<Task["status"], any> = {
   Completed: styles.completedStatus,
   "In Progress": styles.inProgressStatus,
   New: styles.newStatus,
 };
+
+export default TaskListItem;

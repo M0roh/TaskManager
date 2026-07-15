@@ -60,7 +60,7 @@ export default function TaskDetailScreen({ route }: TaskDetailsScreenProps) {
               { color: task.syncStatus ? "#10B981" : "#9CA3AF" },
             ]}
           >
-            {task.syncStatus ? "Синхронизировано" : "Локально"}
+            {task.syncStatus ? "Synced" : "Local"}
           </Text>
         </View>
       </View>
