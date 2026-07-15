@@ -2,7 +2,7 @@
   "expo": {
     "name": "Task Manager",
     "slug": "task-manager",
-    "version": "0.2.0",
+    "version": "0.8.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -29,4 +29,3 @@
     "plugins": ["@react-native-community/datetimepicker"]
   }
 }
-

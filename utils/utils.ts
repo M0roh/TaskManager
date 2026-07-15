@@ -19,7 +19,7 @@ export const getCoordinatesFromAddress = async (
       `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1&accept-language=en,ru`,
       {
         headers: {
-          "User-Agent": "TaskManager/0.2",
+          "User-Agent": "TaskManager/0.8",
         },
       },
     );

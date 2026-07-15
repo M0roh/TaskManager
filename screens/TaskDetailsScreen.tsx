@@ -47,6 +47,31 @@ export default function TaskDetailScreen({ route }: TaskDetailsScreenProps) {
       </View>
     );
 
+  const getPrimaryAction = () => {
+    if (task.status === "New") {
+      return {
+        label: "Start",
+        color: "#3B82F6",
+        icon: "play-outline",
+        onPress: () => updateTaskStatus(task.taskId, "In Progress"),
+      };
+    }
+
+    if (task.status === "In Progress") {
+      return {
+        label: "Complete",
+        color: "#10B981",
+        icon: "checkmark-circle-outline",
+        onPress: () => {
+          updateTaskStatus(task.taskId, "Completed");
+        },
+      };
+    }
+    return null;
+  };
+
+  const action = getPrimaryAction();
+
   const handleDeleteTask = () => {
     Alert.alert(
       "Delete Task",
@@ -219,15 +244,33 @@ export default function TaskDetailScreen({ route }: TaskDetailsScreenProps) {
       </View>
 
       <View style={styles.toolbar}>
-        <TouchableOpacity
-          style={[styles.btn, styles.cancelBtn]}
-          onPress={handleCancelTask}
-        >
-          <Ionicons name={"close-circle-outline"} size={18} color={"#FCE3EF"} />
-          <Text style={[{ color: "#FCE3EF", fontWeight: "700" }]}>
-            {"Cancel"}
-          </Text>
-        </TouchableOpacity>
+        {task.status !== "Completed" && task.status !== "Canceled" && (
+          <TouchableOpacity
+            style={[styles.btn, styles.cancelBtn]}
+            onPress={handleCancelTask}
+          >
+            <Ionicons
+              name={"close-circle-outline"}
+              size={18}
+              color={"#FCE3EF"}
+            />
+            <Text style={[{ color: "#FCE3EF", fontWeight: "700" }]}>
+              {"Cancel"}
+            </Text>
+          </TouchableOpacity>
+        )}
+
+        {action && (
+          <TouchableOpacity
+            style={[styles.btn, { backgroundColor: action.color }]}
+            onPress={action.onPress}
+          >
+            <Ionicons name={action.icon as any} size={20} color="#FFF" />
+            <Text style={[{ color: "#FCE3EF", fontWeight: "700" }]}>
+              {action.label}
+            </Text>
+          </TouchableOpacity>
+        )}
 
         <TouchableOpacity
           style={[styles.btn, styles.deleteBtn]}
