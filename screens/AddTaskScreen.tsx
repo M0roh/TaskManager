@@ -128,6 +128,7 @@ export default function AddTaskScreen() {
             onConfirm={handleConfirm}
             onCancel={hidePicker}
             locale="en"
+            minimumDate={new Date()}
           />
 
           <TouchableOpacity
