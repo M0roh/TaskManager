@@ -11,7 +11,6 @@ interface TaskListItemParams {
 const TaskListItem = React.memo(({ task }: TaskListItemParams) => {
   return (
     <View style={styles.listItem}>
-      {/* Верхний ряд: Заголовок и Статус */}
       <View style={styles.headerRow}>
         <Text style={styles.title} numberOfLines={1}>
           {task.title}
@@ -26,14 +25,12 @@ const TaskListItem = React.memo(({ task }: TaskListItemParams) => {
         </Text>
       </View>
 
-      {/* Описание (не бросается в глаза, шрифт чуть меньше и мягче) */}
       {task.description ? (
         <Text style={styles.description} numberOfLines={2}>
           {task.description}
         </Text>
       ) : null}
 
-      {/* Нижний ряд: Сроки и Дата создания разнесены по сторонам */}
       <View style={styles.footerRow}>
         <Text style={styles.dueDate}>Срок: {formatDate(task.deadline)}</Text>
         <Text style={styles.createdDate}>{formatDate(task.createdDate)}</Text>
@@ -129,12 +126,17 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: "#9CA3AF",
   },
+
+  cancelledStatus: {
+    backgroundColor: "#898989",
+  },
 });
 
 const STATUS_STYLES: Record<Task["status"], any> = {
   Completed: styles.completedStatus,
   "In Progress": styles.inProgressStatus,
   New: styles.newStatus,
+  Canceled: styles.cancelledStatus,
 };
 
 export default TaskListItem;

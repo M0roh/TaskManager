@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import TaskListItem from "../components/TaskListItem";
@@ -15,32 +16,48 @@ export default function HomeScreen() {
           style={styles.createBtn}
           onPress={() => navigation.navigate("AddTask")}
         >
-          <Text style={styles.createBtnText}>+</Text>
+          <Ionicons name={"add-outline"} size={25} color={"#FCE3EF"} />
         </TouchableOpacity>
       </View>
 
       <View>
-        {tasks.map((t) => (
-          <TouchableOpacity
-            key={t.taskId}
-            onPress={() =>
-              navigation.navigate("TaskDetails", { taskId: t.taskId })
-            }
-          >
-            <TaskListItem task={t}></TaskListItem>
-          </TouchableOpacity>
-        ))}
+        {tasks.length > 0 ? (
+          tasks.map((t) => (
+            <TouchableOpacity
+              key={t.taskId}
+              onPress={() =>
+                navigation.navigate("TaskDetails", { taskId: t.taskId })
+              }
+            >
+              <TaskListItem task={t}></TaskListItem>
+            </TouchableOpacity>
+          ))
+        ) : (
+          <Text style={styles.emptyText}>You dont have any tasks.</Text>
+        )}
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  emptyText: {
+    textAlign: "center",
+    marginTop: 15,
+
+    fontWeight: "600",
+    fontSize: 16,
+  },
+
   toolbar: {
+    width: "90%",
+    alignSelf: "center",
     display: "flex",
     flexDirection: "row",
     justifyContent: "space-around",
     margin: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: "#45454545",
   },
 
   createBtn: {
@@ -54,11 +71,5 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 8,
-  },
-
-  createBtnText: {
-    fontSize: 30,
-    fontWeight: "500",
-    color: "#efefef",
   },
 });

@@ -5,7 +5,7 @@ export default interface Task {
 
   title: string;
   description: string;
-  status: "New" | "In Progress" | "Completed";
+  status: "New" | "In Progress" | "Completed" | "Canceled";
 
   location: Location;
 

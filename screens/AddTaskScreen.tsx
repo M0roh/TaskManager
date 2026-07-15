@@ -27,7 +27,10 @@ export default function AddTaskScreen() {
   const [address, setAddress] = useState<string>("");
 
   const [isPickerVisible, setPickerVisibility] = useState(false);
-  const isFormValid = title.trim().length > 0 && description.trim().length > 0;
+  const isFormValid =
+    title.trim().length > 0 &&
+    description.trim().length > 0 &&
+    address.trim().length > 0;
 
   const showPicker = () => setPickerVisibility(true);
   const hidePicker = () => setPickerVisibility(false);

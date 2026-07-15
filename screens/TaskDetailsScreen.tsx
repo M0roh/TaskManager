@@ -1,5 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { useEffect, useState } from "react";
+import {
+  Alert,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import TaskMap from "../components/TaskMap";
 import { useTaskStore } from "../stores/tasksStore";
 import Task from "../types/task";
@@ -14,9 +24,21 @@ interface TaskDetailsScreenProps {
 }
 
 export default function TaskDetailScreen({ route }: TaskDetailsScreenProps) {
-  const task = useTaskStore((state) =>
+  const liveTask = useTaskStore((state) =>
     state.tasks.find((t) => t.taskId === route.params.taskId),
   );
+  const deleteTask = useTaskStore((state) => state.deleteTask);
+  const updateTaskStatus = useTaskStore((state) => state.updateTaskStatus);
+
+  const navigation = useNavigation<any>();
+
+  const [task, setTask] = useState(liveTask);
+
+  useEffect(() => {
+    if (liveTask) {
+      setTask(liveTask);
+    }
+  }, [liveTask]);
 
   if (!task)
     return (
@@ -24,6 +46,51 @@ export default function TaskDetailScreen({ route }: TaskDetailsScreenProps) {
         <Text style={styles.notFoundText}>Error. Task not Found</Text>
       </View>
     );
+
+  const handleDeleteTask = () => {
+    Alert.alert(
+      "Delete Task",
+      "Are you sure you want to delete this task? This action cannot be undone.",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: () => {
+            navigation.navigate("Home");
+            deleteTask(task.taskId);
+          },
+          style: "destructive",
+        },
+      ],
+      { cancelable: true },
+    );
+  };
+
+  const handleCancelTask = () => {
+    Alert.alert(
+      "Cancel Task",
+      "Are you sure you want to cancel this task? This action cannot be undone.",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel",
+        },
+        {
+          text: "Yes",
+          onPress: () => {
+            updateTaskStatus(task.taskId, "Canceled");
+          },
+          style: "destructive",
+        },
+      ],
+      { cancelable: true },
+    );
+  };
 
   return (
     <ScrollView
@@ -150,6 +217,28 @@ export default function TaskDetailScreen({ route }: TaskDetailsScreenProps) {
           </View>
         )}
       </View>
+
+      <View style={styles.toolbar}>
+        <TouchableOpacity
+          style={[styles.btn, styles.cancelBtn]}
+          onPress={handleCancelTask}
+        >
+          <Ionicons name={"close-circle-outline"} size={18} color={"#FCE3EF"} />
+          <Text style={[{ color: "#FCE3EF", fontWeight: "700" }]}>
+            {"Cancel"}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.btn, styles.deleteBtn]}
+          onPress={handleDeleteTask}
+        >
+          <Ionicons name={"trash-bin-outline"} size={18} color={"#FCE3EF"} />
+          <Text style={[{ color: "#FCE3EF", fontWeight: "700" }]}>
+            {"Delete"}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 }
@@ -160,6 +249,31 @@ const styles = StyleSheet.create({
     width: "100%",
     textAlign: "center",
     marginVertical: 20,
+  },
+
+  toolbar: {
+    width: "100%",
+    display: "flex",
+    flexDirection: "row",
+    gap: 15,
+  },
+
+  btn: {
+    flex: 1,
+    display: "flex",
+    flexDirection: "row",
+    gap: 10,
+    padding: 10,
+    borderRadius: 12,
+    backgroundColor: "#EF4444",
+  },
+
+  cancelBtn: {
+    backgroundColor: "#9e9d9d",
+  },
+
+  deleteBtn: {
+    backgroundColor: "#EF4444",
   },
 
   container: {
@@ -319,10 +433,15 @@ const styles = StyleSheet.create({
   completedStatus: {
     backgroundColor: "#48e777",
   },
+
+  cancelledStatus: {
+    backgroundColor: "#898989",
+  },
 });
 
 const STATUS_STYLES: Record<Task["status"], any> = {
   Completed: styles.completedStatus,
   "In Progress": styles.inProgressStatus,
   New: styles.newStatus,
+  Canceled: styles.cancelledStatus,
 };
