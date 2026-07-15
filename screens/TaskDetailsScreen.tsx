@@ -13,7 +13,7 @@ import {
 import TaskMap from "../components/TaskMap";
 import { useTaskStore } from "../stores/tasksStore";
 import Task from "../types/task";
-import { formatDate } from "../utils";
+import { formatDate } from "../utils/utils";
 
 interface TaskDetailsScreenProps {
   route: {

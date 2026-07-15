@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import Location from "./types/location";
+import Location from "../types/location";
 
 const deviceTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const deviceLocale = Intl.DateTimeFormat().resolvedOptions().locale;

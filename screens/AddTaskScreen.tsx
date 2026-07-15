@@ -16,7 +16,7 @@ import {
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { useTaskStore } from "../stores/tasksStore";
 import Location from "../types/location";
-import { formatDate, getCoordinatesFromAddress } from "../utils";
+import { formatDate, getCoordinatesFromAddress } from "../utils/utils";
 
 export default function AddTaskScreen() {
   const navigation = useNavigation<any>();

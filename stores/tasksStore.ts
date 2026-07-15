@@ -4,6 +4,10 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import Location from "../types/location";
 import Task from "../types/task";
+import {
+  cancelTaskNotification,
+  scheduleTaskNotification,
+} from "../utils/notificationHelper";
 
 interface TaskState {
   tasks: Task[];
@@ -21,39 +25,57 @@ interface TaskState {
 
 export const useTaskStore = create<TaskState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       tasks: [],
 
-      addTask: (title, description, deadline, taskLocation) =>
-        set((state) => {
-          const newTask: Task = {
-            taskId: Crypto.randomUUID(),
+      addTask: async (title, description, deadline, taskLocation) => {
+        const notificationId = await scheduleTaskNotification(title, deadline);
 
-            title,
-            description,
-            status: "New",
+        const newTask: Task = {
+          taskId: Crypto.randomUUID(),
 
-            location: taskLocation,
+          title,
+          description,
+          status: "New",
 
-            createdDate: new Date().toISOString(),
-            deadline: deadline.toISOString(),
+          location: taskLocation,
 
-            syncStatus: false,
-          };
-          return { tasks: [newTask, ...state.tasks] };
-        }),
+          createdDate: new Date().toISOString(),
+          deadline: deadline.toISOString(),
 
-      updateTaskStatus: (id, status) =>
+          syncStatus: false,
+          notificationId: notificationId || undefined,
+        };
+
+        set((state) => ({
+          tasks: [newTask, ...state.tasks],
+        }));
+      },
+
+      updateTaskStatus: async (id, status) => {
+        const task = get().tasks.find((t) => t.taskId === id);
+
+        if (task && (status === "Completed" || status === "Canceled")) {
+          await cancelTaskNotification(task.notificationId);
+        }
+
         set((state) => ({
           tasks: state.tasks.map((task) =>
             task.taskId === id ? { ...task, status, syncStatus: false } : task,
           ),
-        })),
+        }));
+      },
 
-      deleteTask: (id) =>
+      deleteTask: async (id) => {
+        const taskToDelete = get().tasks.find((t) => t.taskId === id);
+        if (taskToDelete?.notificationId) {
+          await cancelTaskNotification(taskToDelete.notificationId);
+        }
+
         set((state) => ({
           tasks: state.tasks.filter((task) => task.taskId !== id),
-        })),
+        }));
+      },
 
       clearTasks: () => set({ tasks: [] }),
     }),

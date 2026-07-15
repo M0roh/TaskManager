@@ -14,4 +14,5 @@ export default interface Task {
   completedDate?: string;
 
   syncStatus: boolean;
+  notificationId?: string;
 }

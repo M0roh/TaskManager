@@ -2,7 +2,7 @@ import React from "react";
 
 import { Platform, StyleSheet, Text, View } from "react-native";
 import Task from "../types/task";
-import { formatDate } from "../utils";
+import { formatDate } from "../utils/utils";
 
 interface TaskListItemParams {
   task: Task;
