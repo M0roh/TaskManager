@@ -1,12 +1,12 @@
 import React from "react";
 
-import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View } from "react-native";
 
 import HomeScreen from "./screens/HomeScreen";
 
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 type RootStackParamList = {
   Home: undefined;
@@ -16,25 +16,25 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <StatusBar style="auto" />
+    <SafeAreaProvider>
+      <View style={styles.container}>
+        <View style={styles.navigatorContainer}>
+          <NavigationContainer>
+            <Stack.Navigator initialRouteName="Home">
+              <Stack.Screen
+                name="Home"
+                component={HomeScreen}
+                options={{ title: "Мои задачи" }}
+              />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </View>
 
-      <View style={styles.navigatorContainer}>
-        <NavigationContainer>
-          <Stack.Navigator initialRouteName="Home">
-            <Stack.Screen
-              name="Home"
-              component={HomeScreen}
-              options={{ title: "Мои задачи" }}
-            />
-          </Stack.Navigator>
-        </NavigationContainer>
+        <SafeAreaView edges={["bottom"]} style={styles.footer}>
+          <Text style={styles.footerText}>SA-RN-140720262330</Text>
+        </SafeAreaView>
       </View>
-
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>SA-RN-140720262330</Text>
-      </View>
-    </View>
+    </SafeAreaProvider>
   );
 }
 
@@ -49,16 +49,15 @@ const styles = StyleSheet.create({
 
   footer: {
     display: "flex",
+    alignSelf: "center",
 
-    justifyContent: "center",
-    alignContent: "center",
-
-    padding: 10,
+    paddingVertical: 8,
     borderTopWidth: 1,
     borderTopColor: "#e0e0e0",
   },
   footerText: {
-    fontSize: 12,
+    fontSize: 13,
     color: "#888888",
+    fontWeight: "500",
   },
 });

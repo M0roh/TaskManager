@@ -28,6 +28,18 @@ export const useTaskStore = create<TaskState>()(
 
           syncStatus: false,
         },
+        {
+          taskId: 2,
+
+          title: "Test task 2",
+          description: "test task 2 description",
+          status: "In Progress",
+
+          createdDate: new Date().toISOString(),
+          dueDate: new Date(2026, 8, 16).toISOString(),
+
+          syncStatus: false,
+        },
       ],
 
       addTask: (title, description, dueDate) =>
