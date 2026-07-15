@@ -1,6 +1,8 @@
 .vscode/
 pnpm-lock.yaml
 
+db.json
+
 # dependencies
 node_modules/
 

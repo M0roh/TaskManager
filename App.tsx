@@ -7,9 +7,11 @@ import HomeScreen from "./screens/HomeScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import AddTaskScreen from "./screens/AddTaskScreen";
 
 type RootStackParamList = {
   Home: undefined;
+  AddTask: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -24,7 +26,13 @@ export default function App() {
               <Stack.Screen
                 name="Home"
                 component={HomeScreen}
-                options={{ title: "Мои задачи" }}
+                options={{ title: "My tasks" }}
+              />
+
+              <Stack.Screen
+                name="AddTask"
+                component={AddTaskScreen}
+                options={{ title: "Task creating" }}
               />
             </Stack.Navigator>
           </NavigationContainer>
