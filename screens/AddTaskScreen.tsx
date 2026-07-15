@@ -15,7 +15,8 @@ import {
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { useTaskStore } from "../stores/tasksStore";
-import { formatDate } from "../utils";
+import Location from "../types/location";
+import { formatDate, getCoordinatesFromAddress } from "../utils";
 
 export default function AddTaskScreen() {
   const navigation = useNavigation<any>();
@@ -23,6 +24,7 @@ export default function AddTaskScreen() {
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [date, setDate] = useState<Date>(new Date());
+  const [address, setAddress] = useState<string>("");
 
   const [isPickerVisible, setPickerVisibility] = useState(false);
   const isFormValid = title.trim().length > 0 && description.trim().length > 0;
@@ -36,11 +38,29 @@ export default function AddTaskScreen() {
   };
 
   const addTask = useTaskStore((state) => state.addTask);
-  const handleAddBtn = () => {
+  const handleAddBtn = async () => {
     if (!isFormValid) return;
 
-    addTask(title, description, date);
-    navigation.navigate("Home");
+    let taskLocation: Location;
+
+    if (address.trim().length > 0) {
+      const geoData = await getCoordinatesFromAddress(address);
+
+      if (geoData) {
+        taskLocation = {
+          address: geoData.address,
+          latitude: geoData.latitude,
+          longitude: geoData.longitude,
+        };
+      } else {
+        taskLocation = {
+          address: address,
+        };
+      }
+
+      addTask(title, description, date, taskLocation);
+      navigation.navigate("Home");
+    }
   };
 
   return (
@@ -85,6 +105,17 @@ export default function AddTaskScreen() {
                 {formatDate(date.toISOString())}
               </Text>
             </TouchableOpacity>
+          </View>
+
+          <View style={styles.row}>
+            <Text style={styles.label}>Location address</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Where should this task be done?"
+              placeholderTextColor="#9CA3AF"
+              value={address}
+              onChangeText={setAddress}
+            />
           </View>
 
           <DateTimePickerModal

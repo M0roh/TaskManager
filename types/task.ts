@@ -7,7 +7,7 @@ export default interface Task {
   description: string;
   status: "New" | "In Progress" | "Completed";
 
-  location?: Location;
+  location: Location;
 
   createdDate: string;
   deadline: string;

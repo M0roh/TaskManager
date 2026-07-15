@@ -2,12 +2,18 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Crypto from "expo-crypto";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import Location from "../types/location";
 import Task from "../types/task";
 
 interface TaskState {
   tasks: Task[];
 
-  addTask: (title: string, description: string, deadline: Date) => void;
+  addTask: (
+    title: string,
+    description: string,
+    deadline: Date,
+    taskLocation: Location,
+  ) => void;
   updateTaskStatus: (id: string, status: Task["status"]) => void;
   deleteTask: (id: string) => void;
   clearTasks: () => void;
@@ -18,7 +24,7 @@ export const useTaskStore = create<TaskState>()(
     (set) => ({
       tasks: [],
 
-      addTask: (title, description, deadline) =>
+      addTask: (title, description, deadline, taskLocation) =>
         set((state) => {
           const newTask: Task = {
             taskId: Crypto.randomUUID(),
@@ -26,6 +32,8 @@ export const useTaskStore = create<TaskState>()(
             title,
             description,
             status: "New",
+
+            location: taskLocation,
 
             createdDate: new Date().toISOString(),
             deadline: deadline.toISOString(),

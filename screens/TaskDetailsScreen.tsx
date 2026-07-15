@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Platform, ScrollView, StyleSheet, Text, View } from "react-native";
+import TaskMap from "../components/TaskMap";
 import { useTaskStore } from "../stores/tasksStore";
 import Task from "../types/task";
 import { formatDate } from "../utils";
@@ -136,7 +137,11 @@ export default function TaskDetailScreen({ route }: TaskDetailsScreenProps) {
               </Text>
             </View>
 
-            {/*!! MAP !!*/}
+            <TaskMap
+              latitude={task.location?.latitude}
+              longitude={task.location?.longitude}
+              address={task.location?.address}
+            />
           </View>
         ) : (
           <View style={styles.emptyCard}>
