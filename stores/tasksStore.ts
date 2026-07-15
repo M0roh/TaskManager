@@ -7,7 +7,7 @@ import Task from "../types/task";
 interface TaskState {
   tasks: Task[];
 
-  addTask: (title: string, description: string, dueDate: Date) => void;
+  addTask: (title: string, description: string, deadline: Date) => void;
   updateTaskStatus: (id: string, status: Task["status"]) => void;
   deleteTask: (id: string) => void;
   clearTasks: () => void;
@@ -18,7 +18,7 @@ export const useTaskStore = create<TaskState>()(
     (set) => ({
       tasks: [],
 
-      addTask: (title, description, dueDate) =>
+      addTask: (title, description, deadline) =>
         set((state) => {
           const newTask: Task = {
             taskId: Crypto.randomUUID(),
@@ -28,7 +28,7 @@ export const useTaskStore = create<TaskState>()(
             status: "New",
 
             createdDate: new Date().toISOString(),
-            dueDate: dueDate.toISOString(),
+            deadline: deadline.toISOString(),
 
             syncStatus: false,
           };

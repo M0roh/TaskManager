@@ -21,7 +21,14 @@ export default function HomeScreen() {
 
       <View>
         {tasks.map((t) => (
-          <TaskListItem key={t.taskId} task={t}></TaskListItem>
+          <TouchableOpacity
+            key={t.taskId}
+            onPress={() =>
+              navigation.navigate("TaskDetails", { taskId: t.taskId })
+            }
+          >
+            <TaskListItem task={t}></TaskListItem>
+          </TouchableOpacity>
         ))}
       </View>
     </View>

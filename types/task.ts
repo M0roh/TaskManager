@@ -1,3 +1,5 @@
+import Location from "./location";
+
 export default interface Task {
   taskId: string;
 
@@ -8,7 +10,7 @@ export default interface Task {
   location?: Location;
 
   createdDate: string;
-  dueDate: string;
+  deadline: string;
   completedDate?: string;
 
   syncStatus: boolean;

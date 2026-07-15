@@ -8,10 +8,12 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import AddTaskScreen from "./screens/AddTaskScreen";
+import TaskDetailScreen from "./screens/TaskDetailsScreen";
 
 type RootStackParamList = {
   Home: undefined;
   AddTask: undefined;
+  TaskDetails: { taskId: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -32,6 +34,12 @@ export default function App() {
               <Stack.Screen
                 name="AddTask"
                 component={AddTaskScreen}
+                options={{ title: "Task creating" }}
+              />
+
+              <Stack.Screen
+                name="TaskDetails"
+                component={TaskDetailScreen}
                 options={{ title: "Task creating" }}
               />
             </Stack.Navigator>
