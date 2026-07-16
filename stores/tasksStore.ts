@@ -170,7 +170,9 @@ export const useTaskStore = create<TaskState>()(
       clearTasks: () => set({ tasks: [] }),
 
       syncTasks: async () => {
-        const SERVER_URL = "http://192.168.100.6:3000/tasks";
+        const BASE_URL =
+          process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
+        const SERVER_URL = `${BASE_URL}/tasks`;
 
         const tasks = get().tasks;
 
