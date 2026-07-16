@@ -158,10 +158,21 @@ export default function TaskDetailScreen({ route }: TaskDetailsScreenProps) {
         </View>
       </View>
 
-      <Text style={styles.title}>{task.title}</Text>
-      <Text style={styles.description}>
-        {task.description || "Описания нет"}
-      </Text>
+      <View style={styles.titleRow}>
+        <View>
+          <Text style={styles.title}>{task.title}</Text>
+          <Text style={styles.description}>{task.description || ""}</Text>
+        </View>
+
+        <TouchableOpacity
+          style={styles.editBtn}
+          onPress={() =>
+            navigation.navigate("UpsertTask", { taskId: task.taskId })
+          }
+        >
+          <Ionicons name="pencil-outline" size={20} color={"#289efe"} />
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.divider} />
 
@@ -292,6 +303,22 @@ const styles = StyleSheet.create({
     width: "100%",
     textAlign: "center",
     marginVertical: 20,
+  },
+
+  titleRow: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  editBtn: {
+    borderRadius: "50%",
+    borderWidth: 2,
+    padding: 7,
+    borderColor: "#289efe",
+    marginBottom: 10,
+    marginRight: 10,
   },
 
   toolbar: {

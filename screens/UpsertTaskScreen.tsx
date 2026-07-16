@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Keyboard,
   KeyboardAvoidingView,
@@ -18,13 +18,38 @@ import { useTaskStore } from "../stores/tasksStore";
 import Location from "../types/location";
 import { formatDate, getCoordinatesFromAddress } from "../utils/utils";
 
-export default function AddTaskScreen() {
+interface UpsertTaskScreenProps {
+  route: {
+    params: {
+      taskId?: string;
+    };
+  };
+}
+
+export default function UpsertTaskScreen({ route }: UpsertTaskScreenProps) {
   const navigation = useNavigation<any>();
 
-  const [title, setTitle] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-  const [date, setDate] = useState<Date>(new Date());
-  const [address, setAddress] = useState<string>("");
+  const { taskId } = route.params || {};
+  const taskToEdit = useTaskStore((state) =>
+    taskId ? state.tasks.find((t) => t.taskId === taskId) : undefined,
+  );
+
+  const [title, setTitle] = useState<string>(taskToEdit?.title || "");
+  const [description, setDescription] = useState<string>(
+    taskToEdit?.description || "",
+  );
+  const [date, setDate] = useState<Date>(
+    taskToEdit ? new Date(taskToEdit.deadline) : new Date(),
+  );
+  const [address, setAddress] = useState<string>(
+    taskToEdit?.location.address || "",
+  );
+
+  useEffect(() => {
+    navigation.setOptions({
+      title: taskId ? "Edit Task" : "Create Task",
+    });
+  }, [navigation, taskId]);
 
   const [isPickerVisible, setPickerVisibility] = useState(false);
   const isFormValid =
@@ -41,12 +66,13 @@ export default function AddTaskScreen() {
   };
 
   const addTask = useTaskStore((state) => state.addTask);
+  const editTask = useTaskStore((state) => state.editTask);
   const handleAddBtn = async () => {
     if (!isFormValid) return;
 
     let taskLocation: Location;
 
-    if (address.trim().length > 0) {
+    if (!taskToEdit || taskToEdit.location.address !== address) {
       const geoData = await getCoordinatesFromAddress(address);
 
       if (geoData) {
@@ -60,10 +86,13 @@ export default function AddTaskScreen() {
           address: address,
         };
       }
+    } else taskLocation = taskToEdit.location;
 
-      addTask(title, description, date, taskLocation);
-      navigation.navigate("Home");
-    }
+    if (taskToEdit)
+      editTask(taskToEdit.taskId, title, description, date, taskLocation);
+    else addTask(title, description, date, taskLocation);
+
+    navigation.navigate("Home");
   };
 
   return (
@@ -136,7 +165,9 @@ export default function AddTaskScreen() {
             onPress={handleAddBtn}
             disabled={!isFormValid}
           >
-            <Text style={styles.btnText}>Create Task</Text>
+            <Text style={styles.btnText}>
+              {taskToEdit ? "Apply changes" : "Create Task"}
+            </Text>
           </TouchableOpacity>
         </ScrollView>
       </TouchableWithoutFeedback>

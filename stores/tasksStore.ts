@@ -18,6 +18,13 @@ interface TaskState {
     deadline: Date,
     taskLocation: Location,
   ) => void;
+  editTask: (
+    id: string,
+    title: string,
+    description: string,
+    deadline: Date,
+    taskLocation: Location,
+  ) => void;
   updateTaskStatus: (id: string, status: Task["status"]) => void;
   deleteTask: (id: string) => void;
   clearTasks: () => void;
@@ -49,6 +56,32 @@ export const useTaskStore = create<TaskState>()(
 
         set((state) => ({
           tasks: [newTask, ...state.tasks],
+        }));
+      },
+
+      editTask: async (id, title, description, deadline, taskLocation) => {
+        const task = get().tasks.find((t) => t.taskId === id);
+        if (!task) return;
+
+        const taskTime = new Date(task.deadline).getTime();
+        if (deadline && taskTime !== deadline.getTime()) {
+          await cancelTaskNotification(task.notificationId);
+          await scheduleTaskNotification(task.title, deadline);
+        }
+
+        set((state) => ({
+          tasks: state.tasks.map((task) =>
+            task.taskId === id
+              ? {
+                  ...task,
+                  title,
+                  description,
+                  location: taskLocation,
+                  deadline: deadline.toISOString(),
+                  syncStatus: false,
+                }
+              : task,
+          ),
         }));
       },
 

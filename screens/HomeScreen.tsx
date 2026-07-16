@@ -74,7 +74,7 @@ export default function HomeScreen() {
       <View style={styles.toolbar}>
         <TouchableOpacity
           style={styles.createBtn}
-          onPress={() => navigation.navigate("AddTask")}
+          onPress={() => navigation.navigate("UpsertTask")}
         >
           <Ionicons name={"add-outline"} size={25} color={"#FCE3EF"} />
         </TouchableOpacity>
