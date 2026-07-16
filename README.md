@@ -1,7 +1,5 @@
 # Offline-First Task Manager (React Native & Expo)
 
-## Candidate Code: SA-RN-140720262330
-
 A robust, offline-first mobile Task Manager built with **React Native (Expo)**, **Zustand**, and **AsyncStorage**. The application features an advanced synchronization queue to seamlessly sync local offline actions with a mock backend (**json-server**) when network connectivity is available.
 
 ---
