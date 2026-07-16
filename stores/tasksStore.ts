@@ -34,6 +34,8 @@ interface TaskState {
   updateTaskStatus: (id: string, status: Task["status"]) => void;
   deleteTask: (id: string) => void;
   clearTasks: () => void;
+
+  syncTasks: () => void;
 }
 
 export const useTaskStore = create<TaskState>()(
@@ -66,7 +68,7 @@ export const useTaskStore = create<TaskState>()(
         const notificationId = await scheduleTaskNotification(title, deadline);
 
         const newTask: Task = {
-          taskId: Crypto.randomUUID(),
+          id: Crypto.randomUUID(),
 
           title,
           description,
@@ -97,7 +99,7 @@ export const useTaskStore = create<TaskState>()(
         taskLocation,
         attachments,
       ) => {
-        const task = get().tasks.find((t) => t.taskId === id);
+        const task = get().tasks.find((t) => t.id === id);
         if (!task) return;
         const hasAttachmentChanged =
           JSON.stringify(task?.attachments) !== JSON.stringify(attachments);
@@ -118,7 +120,7 @@ export const useTaskStore = create<TaskState>()(
 
         set((state) => ({
           tasks: state.tasks.map((task) =>
-            task.taskId === id
+            task.id === id
               ? {
                   ...task,
                   title,
@@ -134,7 +136,7 @@ export const useTaskStore = create<TaskState>()(
       },
 
       updateTaskStatus: async (id, status) => {
-        const task = get().tasks.find((t) => t.taskId === id);
+        const task = get().tasks.find((t) => t.id === id);
 
         if (task && (status === "Completed" || status === "Canceled")) {
           await cancelTaskNotification(task.notificationId);
@@ -147,13 +149,13 @@ export const useTaskStore = create<TaskState>()(
 
         set((state) => ({
           tasks: state.tasks.map((task) =>
-            task.taskId === id ? { ...task, status, syncStatus: false } : task,
+            task.id === id ? { ...task, status, syncStatus: false } : task,
           ),
         }));
       },
 
       deleteTask: async (id) => {
-        const taskToDelete = get().tasks.find((t) => t.taskId === id);
+        const taskToDelete = get().tasks.find((t) => t.id === id);
         if (taskToDelete?.notificationId) {
           await cancelTaskNotification(taskToDelete.notificationId);
         }
@@ -161,11 +163,117 @@ export const useTaskStore = create<TaskState>()(
         get().addLog("DELETE", `Deleted task "${taskToDelete?.title}"`);
 
         set((state) => ({
-          tasks: state.tasks.filter((task) => task.taskId !== id),
+          tasks: state.tasks.filter((task) => task.id !== id),
         }));
       },
 
       clearTasks: () => set({ tasks: [] }),
+
+      syncTasks: async () => {
+        const SERVER_URL = "http://192.168.100.6:3000/tasks";
+
+        const tasks = get().tasks;
+
+        let localTasks = [...tasks];
+        let hasChanges = false;
+
+        for (let i = 0; i < localTasks.length; i++) {
+          const task = localTasks[i];
+          if (task.syncStatus) continue;
+
+          try {
+            const checkRes = await fetch(`${SERVER_URL}/${task.id}`);
+            const exists = checkRes.status === 200;
+
+            const response = await fetch(
+              exists ? `${SERVER_URL}/${task.id}` : SERVER_URL,
+              {
+                method: exists ? "PUT" : "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  ...task,
+                  id: task.id,
+                  syncStatus: true,
+                }),
+              },
+            );
+
+            if (response.ok) {
+              localTasks[i] = { ...task, syncStatus: true };
+              hasChanges = true;
+            } else {
+              localTasks[i] = { ...task, syncStatus: false };
+              hasChanges = true;
+            }
+          } catch (error) {
+            console.log(`Push failed for task ${task.id}:`, error);
+            localTasks[i] = { ...task, syncStatus: false };
+            hasChanges = true;
+          }
+        }
+
+        try {
+          const pullResponse = await fetch(SERVER_URL);
+          if (pullResponse.ok) {
+            const serverTasks = await pullResponse.json();
+
+            const mergedTasks = [...localTasks];
+
+            serverTasks.forEach((sTask: Task) => {
+              const localIndex = mergedTasks.findIndex(
+                (t) => t.id === sTask.id,
+              );
+
+              if (localIndex === -1) {
+                mergedTasks.push({
+                  id: sTask.id,
+                  title: sTask.title,
+                  description: sTask.description,
+                  createdDate: sTask.createdDate,
+                  deadline: sTask.deadline,
+                  location: sTask.location,
+                  attachments: sTask.attachments || [],
+                  status: sTask.status,
+                  syncStatus: true,
+                });
+                hasChanges = true;
+              } else {
+                const localTask = mergedTasks[localIndex];
+                if (localTask.syncStatus) {
+                  mergedTasks[localIndex] = {
+                    ...localTask,
+                    title: sTask.title,
+                    description: sTask.description,
+                    deadline: sTask.deadline,
+                    location: sTask.location,
+                    attachments: sTask.attachments || [],
+                    status: sTask.status,
+                    syncStatus: true,
+                  };
+                  hasChanges = true;
+                }
+              }
+            });
+
+            if (hasChanges) {
+              set({ tasks: mergedTasks });
+              get().addLog(
+                "SYNC",
+                "Sync completed: pushed local updates and pulled server changes.",
+              );
+            }
+          }
+        } catch (pullError) {
+          console.log("Pull from server failed:", pullError);
+          if (hasChanges) {
+            set({ tasks: localTasks });
+          }
+          get().addLog(
+            "SYNC",
+            "Sync partially failed (Offline mode or Server unreachable)",
+          );
+        }
+      },
     }),
 
     {

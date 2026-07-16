@@ -1,7 +1,7 @@
 import Location from "./location";
 
 export default interface Task {
-  taskId: string;
+  id: string;
 
   title: string;
   description: string;

@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   FlatList,
   ScrollView,
@@ -38,6 +38,12 @@ export default function HomeScreen() {
     setSortOrder(sortOrder === "asc" ? "desc" : "asc");
   };
 
+  const syncTasks = useTaskStore((state) => state.syncTasks);
+
+  useEffect(() => {
+    syncTasks();
+  }, []);
+
   const processedTasks = useMemo(() => {
     let result = [...tasks];
     if (activeStatus !== "All") {
@@ -73,14 +79,23 @@ export default function HomeScreen() {
     <View style={{ flex: 1 }}>
       <View style={styles.toolbar}>
         <View style={styles.buttons}>
+          <TouchableOpacity style={styles.additionalBtn} onPress={syncTasks}>
+            <Ionicons
+              name={"sync-circle-outline"}
+              size={25}
+              color={"#FCE3EF"}
+            />
+          </TouchableOpacity>
+
           <TouchableOpacity
             style={styles.createBtn}
             onPress={() => navigation.navigate("UpsertTask")}
           >
             <Ionicons name={"add-outline"} size={25} color={"#FCE3EF"} />
           </TouchableOpacity>
+
           <TouchableOpacity
-            style={styles.historyBtn}
+            style={styles.additionalBtn}
             onPress={() => navigation.navigate("History")}
           >
             <Ionicons name={"receipt-outline"} size={25} color={"#FCE3EF"} />
@@ -192,13 +207,12 @@ export default function HomeScreen() {
         {processedTasks.length > 0 ? (
           <FlatList
             data={processedTasks}
-            keyExtractor={(t) => t.taskId}
+            keyExtractor={(t) => t.id}
             contentContainerStyle={{ paddingBottom: 120, paddingTop: 10 }}
             renderItem={({ item }) => (
               <TouchableOpacity
-                key={item.taskId}
                 onPress={() =>
-                  navigation.navigate("TaskDetails", { taskId: item.taskId })
+                  navigation.navigate("TaskDetails", { taskId: item.id })
                 }
               >
                 <TaskListItem task={item} />
@@ -239,10 +253,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     marginBottom: 5,
+
+    marginVertical: 5,
   },
 
   createBtn: {
-    width: "80%",
+    width: "60%",
     alignSelf: "center",
     display: "flex",
     justifyContent: "center",
@@ -254,13 +270,11 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 8,
   },
-  historyBtn: {
+  additionalBtn: {
     alignSelf: "center",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-
-    marginVertical: 5,
 
     backgroundColor: "#289eec",
     height: 40,

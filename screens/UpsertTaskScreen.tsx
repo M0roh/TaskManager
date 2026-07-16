@@ -3,6 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
 import { useEffect, useState } from "react";
 import {
+  Alert,
   Image,
   Keyboard,
   KeyboardAvoidingView,
@@ -33,7 +34,7 @@ export default function UpsertTaskScreen({ route }: UpsertTaskScreenProps) {
 
   const { taskId } = route?.params || {};
   const taskToEdit = useTaskStore((state) =>
-    taskId ? state.tasks.find((t) => t.taskId === taskId) : undefined,
+    taskId ? state.tasks.find((t) => t.id === taskId) : undefined,
   );
 
   const [title, setTitle] = useState<string>(taskToEdit?.title || "");
@@ -73,7 +74,20 @@ export default function UpsertTaskScreen({ route }: UpsertTaskScreenProps) {
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
-      alert("Sorry, we need camera roll permissions to make this work!");
+      Alert.alert(
+        "Permissions",
+        "Sorry, we need camera roll permissions to make this work!",
+        [{ text: "OK" }],
+      );
+      return;
+    }
+
+    if (attachments.length >= 5) {
+      Alert.alert(
+        "Limit Reached",
+        "You can attach a maximum of 5 images per task to optimize sync speed.",
+        [{ text: "OK" }],
+      );
       return;
     }
 
@@ -114,7 +128,7 @@ export default function UpsertTaskScreen({ route }: UpsertTaskScreenProps) {
 
     if (taskToEdit)
       editTask(
-        taskToEdit.taskId,
+        taskToEdit.id,
         title,
         description,
         date,
@@ -204,8 +218,8 @@ export default function UpsertTaskScreen({ route }: UpsertTaskScreenProps) {
                 key={index}
                 source={{ uri }}
                 style={{
-                  width: 80,
-                  height: 80,
+                  width: 100,
+                  height: 100,
                   borderRadius: 8,
                   marginRight: 8,
                 }}

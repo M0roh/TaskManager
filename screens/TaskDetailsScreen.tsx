@@ -26,7 +26,7 @@ interface TaskDetailsScreenProps {
 
 export default function TaskDetailScreen({ route }: TaskDetailsScreenProps) {
   const liveTask = useTaskStore((state) =>
-    state.tasks.find((t) => t.taskId === route.params.taskId),
+    state.tasks.find((t) => t.id === route.params.taskId),
   );
   const deleteTask = useTaskStore((state) => state.deleteTask);
   const updateTaskStatus = useTaskStore((state) => state.updateTaskStatus);
@@ -54,7 +54,7 @@ export default function TaskDetailScreen({ route }: TaskDetailsScreenProps) {
         label: "Start",
         color: "#3B82F6",
         icon: "play-outline",
-        onPress: () => updateTaskStatus(task.taskId, "In Progress"),
+        onPress: () => updateTaskStatus(task.id, "In Progress"),
       };
     }
 
@@ -64,7 +64,7 @@ export default function TaskDetailScreen({ route }: TaskDetailsScreenProps) {
         color: "#10B981",
         icon: "checkmark-circle-outline",
         onPress: () => {
-          updateTaskStatus(task.taskId, "Completed");
+          updateTaskStatus(task.id, "Completed");
         },
       };
     }
@@ -87,7 +87,7 @@ export default function TaskDetailScreen({ route }: TaskDetailsScreenProps) {
           text: "Delete",
           onPress: () => {
             navigation.navigate("Home");
-            deleteTask(task.taskId);
+            deleteTask(task.id);
           },
           style: "destructive",
         },
@@ -109,7 +109,7 @@ export default function TaskDetailScreen({ route }: TaskDetailsScreenProps) {
         {
           text: "Yes",
           onPress: () => {
-            updateTaskStatus(task.taskId, "Canceled");
+            updateTaskStatus(task.id, "Canceled");
           },
           style: "destructive",
         },
@@ -167,9 +167,7 @@ export default function TaskDetailScreen({ route }: TaskDetailsScreenProps) {
 
         <TouchableOpacity
           style={styles.editBtn}
-          onPress={() =>
-            navigation.navigate("UpsertTask", { taskId: task.taskId })
-          }
+          onPress={() => navigation.navigate("UpsertTask", { taskId: task.id })}
         >
           <Ionicons name="pencil-outline" size={20} color={"#289efe"} />
         </TouchableOpacity>
@@ -263,7 +261,7 @@ export default function TaskDetailScreen({ route }: TaskDetailsScreenProps) {
           <Image
             key={index}
             source={{ uri }}
-            style={{ width: 80, height: 80, borderRadius: 8, marginRight: 8 }}
+            style={{ width: 100, height: 100, borderRadius: 8, marginRight: 8 }}
             onError={() => {
               console.log("Image load failed");
             }}
