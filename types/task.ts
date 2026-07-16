@@ -8,6 +8,7 @@ export default interface Task {
   status: "New" | "In Progress" | "Completed" | "Canceled";
 
   location: Location;
+  attachments?: string[];
 
   createdDate: string;
   deadline: string;

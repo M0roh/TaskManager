@@ -1,7 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import * as ImagePicker from "expo-image-picker";
 import { useEffect, useState } from "react";
 import {
+  Image,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -44,6 +46,9 @@ export default function UpsertTaskScreen({ route }: UpsertTaskScreenProps) {
   const [address, setAddress] = useState<string>(
     taskToEdit?.location.address || "",
   );
+  const [attachments, setAttachments] = useState<string[]>(
+    taskToEdit?.attachments ?? [],
+  );
 
   useEffect(() => {
     navigation.setOptions({
@@ -63,6 +68,25 @@ export default function UpsertTaskScreen({ route }: UpsertTaskScreenProps) {
   const handleConfirm = (selectedDate: Date) => {
     setDate(selectedDate);
     hidePicker();
+  };
+
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      alert("Sorry, we need camera roll permissions to make this work!");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: "images",
+      allowsEditing: true,
+      quality: 0.6,
+    });
+
+    if (!result.canceled) {
+      const newUri = result.assets[0].uri;
+      setAttachments((prev) => [...prev, newUri]);
+    }
   };
 
   const addTask = useTaskStore((state) => state.addTask);
@@ -89,8 +113,15 @@ export default function UpsertTaskScreen({ route }: UpsertTaskScreenProps) {
     } else taskLocation = taskToEdit.location;
 
     if (taskToEdit)
-      editTask(taskToEdit.taskId, title, description, date, taskLocation);
-    else addTask(title, description, date, taskLocation);
+      editTask(
+        taskToEdit.taskId,
+        title,
+        description,
+        date,
+        taskLocation,
+        attachments,
+      );
+    else addTask(title, description, date, taskLocation, attachments);
 
     navigation.navigate("Home");
   };
@@ -159,6 +190,31 @@ export default function UpsertTaskScreen({ route }: UpsertTaskScreenProps) {
             locale="en"
             minimumDate={new Date()}
           />
+
+          <TouchableOpacity onPress={pickImage} style={styles.btn}>
+            <Text>Attach Photo</Text>
+          </TouchableOpacity>
+
+          <ScrollView
+            horizontal
+            style={{ flexDirection: "row", marginVertical: 10 }}
+          >
+            {attachments.map((uri, index) => (
+              <Image
+                key={index}
+                source={{ uri }}
+                style={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: 8,
+                  marginRight: 8,
+                }}
+                onError={() => {
+                  console.log("Image load failed");
+                }}
+              />
+            ))}
+          </ScrollView>
 
           <TouchableOpacity
             style={[styles.btn, !isFormValid && styles.btnDisabled]}

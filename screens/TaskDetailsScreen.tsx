@@ -3,6 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import {
   Alert,
+  Image,
   Platform,
   ScrollView,
   StyleSheet,
@@ -254,6 +255,22 @@ export default function TaskDetailScreen({ route }: TaskDetailsScreenProps) {
         )}
       </View>
 
+      <ScrollView
+        horizontal
+        style={{ flexDirection: "row", marginVertical: 10 }}
+      >
+        {task.attachments?.map((uri, index) => (
+          <Image
+            key={index}
+            source={{ uri }}
+            style={{ width: 80, height: 80, borderRadius: 8, marginRight: 8 }}
+            onError={() => {
+              console.log("Image load failed");
+            }}
+          />
+        ))}
+      </ScrollView>
+
       <View style={styles.toolbar}>
         {task.status !== "Completed" && task.status !== "Canceled" && (
           <TouchableOpacity
@@ -326,6 +343,11 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     gap: 15,
+
+    borderTopColor: "#45454545",
+    borderTopWidth: 1,
+    paddingTop: 10,
+    marginTop: 15,
   },
 
   btn: {
@@ -397,7 +419,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 15,
   },
   sectionTitle: {
     fontSize: 16,

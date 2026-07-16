@@ -21,6 +21,7 @@ interface TaskState {
     description: string,
     deadline: Date,
     taskLocation: Location,
+    attachments: string[],
   ) => void;
   editTask: (
     id: string,
@@ -28,6 +29,7 @@ interface TaskState {
     description: string,
     deadline: Date,
     taskLocation: Location,
+    attachments: string[],
   ) => void;
   updateTaskStatus: (id: string, status: Task["status"]) => void;
   deleteTask: (id: string) => void;
@@ -54,7 +56,13 @@ export const useTaskStore = create<TaskState>()(
           ],
         })),
 
-      addTask: async (title, description, deadline, taskLocation) => {
+      addTask: async (
+        title,
+        description,
+        deadline,
+        taskLocation,
+        attachments,
+      ) => {
         const notificationId = await scheduleTaskNotification(title, deadline);
 
         const newTask: Task = {
@@ -65,6 +73,7 @@ export const useTaskStore = create<TaskState>()(
           status: "New",
 
           location: taskLocation,
+          attachments,
 
           createdDate: new Date().toISOString(),
           deadline: deadline.toISOString(),
@@ -80,9 +89,18 @@ export const useTaskStore = create<TaskState>()(
         }));
       },
 
-      editTask: async (id, title, description, deadline, taskLocation) => {
+      editTask: async (
+        id,
+        title,
+        description,
+        deadline,
+        taskLocation,
+        attachments,
+      ) => {
         const task = get().tasks.find((t) => t.taskId === id);
         if (!task) return;
+        const hasAttachmentChanged =
+          JSON.stringify(task?.attachments) !== JSON.stringify(attachments);
 
         const taskTime = new Date(task.deadline).getTime();
         if (deadline && taskTime !== deadline.getTime()) {
@@ -90,6 +108,12 @@ export const useTaskStore = create<TaskState>()(
           await scheduleTaskNotification(task.title, deadline);
         }
 
+        if (hasAttachmentChanged) {
+          get().addLog(
+            "ATTACHMENT_CHANGE",
+            `Updated attachments for task "${title}"`,
+          );
+        }
         get().addLog("EDIT", `Edited task "${title}"`);
 
         set((state) => ({
@@ -100,6 +124,7 @@ export const useTaskStore = create<TaskState>()(
                   title,
                   description,
                   location: taskLocation,
+                  attachments,
                   deadline: deadline.toISOString(),
                   syncStatus: false,
                 }
