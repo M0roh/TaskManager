@@ -72,12 +72,20 @@ export default function HomeScreen() {
   return (
     <View style={{ flex: 1 }}>
       <View style={styles.toolbar}>
-        <TouchableOpacity
-          style={styles.createBtn}
-          onPress={() => navigation.navigate("UpsertTask")}
-        >
-          <Ionicons name={"add-outline"} size={25} color={"#FCE3EF"} />
-        </TouchableOpacity>
+        <View style={styles.buttons}>
+          <TouchableOpacity
+            style={styles.createBtn}
+            onPress={() => navigation.navigate("UpsertTask")}
+          >
+            <Ionicons name={"add-outline"} size={25} color={"#FCE3EF"} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.historyBtn}
+            onPress={() => navigation.navigate("History")}
+          >
+            <Ionicons name={"receipt-outline"} size={25} color={"#FCE3EF"} />
+          </TouchableOpacity>
+        </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Status</Text>
@@ -226,6 +234,13 @@ const styles = StyleSheet.create({
     borderBottomColor: "#45454545",
   },
 
+  buttons: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 5,
+  },
+
   createBtn: {
     width: "80%",
     alignSelf: "center",
@@ -237,6 +252,19 @@ const styles = StyleSheet.create({
 
     backgroundColor: "#289eec",
     height: 40,
+    borderRadius: 8,
+  },
+  historyBtn: {
+    alignSelf: "center",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+
+    marginVertical: 5,
+
+    backgroundColor: "#289eec",
+    height: 40,
+    width: 40,
     borderRadius: 8,
   },
 

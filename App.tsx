@@ -7,6 +7,7 @@ import HomeScreen from "./screens/HomeScreen";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import HistoryScreen from "./screens/HistoryScreen";
 import TaskDetailScreen from "./screens/TaskDetailsScreen";
 import UpsertTaskScreen from "./screens/UpsertTaskScreen";
 
@@ -14,6 +15,7 @@ type RootStackParamList = {
   Home: undefined;
   UpsertTask: undefined;
   TaskDetails: { taskId: string };
+  History: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -41,6 +43,12 @@ export default function App() {
                 name="TaskDetails"
                 component={TaskDetailScreen}
                 options={{ title: "Task creating" }}
+              />
+
+              <Stack.Screen
+                name="History"
+                component={HistoryScreen}
+                options={{ title: "History" }}
               />
             </Stack.Navigator>
           </NavigationContainer>

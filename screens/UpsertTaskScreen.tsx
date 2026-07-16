@@ -19,7 +19,7 @@ import Location from "../types/location";
 import { formatDate, getCoordinatesFromAddress } from "../utils/utils";
 
 interface UpsertTaskScreenProps {
-  route: {
+  route?: {
     params: {
       taskId?: string;
     };
@@ -29,7 +29,7 @@ interface UpsertTaskScreenProps {
 export default function UpsertTaskScreen({ route }: UpsertTaskScreenProps) {
   const navigation = useNavigation<any>();
 
-  const { taskId } = route.params || {};
+  const { taskId } = route?.params || {};
   const taskToEdit = useTaskStore((state) =>
     taskId ? state.tasks.find((t) => t.taskId === taskId) : undefined,
   );

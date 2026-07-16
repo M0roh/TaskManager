@@ -3,6 +3,7 @@ import * as Crypto from "expo-crypto";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import Location from "../types/location";
+import { LogActionType, LogItem } from "../types/logItem";
 import Task from "../types/task";
 import {
   cancelTaskNotification,
@@ -11,6 +12,9 @@ import {
 
 interface TaskState {
   tasks: Task[];
+  logs: LogItem[];
+
+  addLog: (actionType: LogActionType, description: string) => void;
 
   addTask: (
     title: string,
@@ -34,6 +38,21 @@ export const useTaskStore = create<TaskState>()(
   persist(
     (set, get) => ({
       tasks: [],
+      logs: [],
+
+      addLog: (actionType, description) =>
+        set((state) => ({
+          logs: [
+            {
+              id:
+                Date.now().toString() + Math.random().toString(36).substr(2, 9),
+              timestamp: new Date().toISOString(),
+              actionType,
+              description,
+            },
+            ...state.logs,
+          ],
+        })),
 
       addTask: async (title, description, deadline, taskLocation) => {
         const notificationId = await scheduleTaskNotification(title, deadline);
@@ -54,6 +73,8 @@ export const useTaskStore = create<TaskState>()(
           notificationId: notificationId || undefined,
         };
 
+        get().addLog("CREATE", `Created task "${title}"`);
+
         set((state) => ({
           tasks: [newTask, ...state.tasks],
         }));
@@ -68,6 +89,8 @@ export const useTaskStore = create<TaskState>()(
           await cancelTaskNotification(task.notificationId);
           await scheduleTaskNotification(task.title, deadline);
         }
+
+        get().addLog("EDIT", `Edited task "${title}"`);
 
         set((state) => ({
           tasks: state.tasks.map((task) =>
@@ -92,6 +115,11 @@ export const useTaskStore = create<TaskState>()(
           await cancelTaskNotification(task.notificationId);
         }
 
+        get().addLog(
+          "STATUS_CHANGE",
+          `Status task "${task?.title}" changed from ${task?.status} to ${status}`,
+        );
+
         set((state) => ({
           tasks: state.tasks.map((task) =>
             task.taskId === id ? { ...task, status, syncStatus: false } : task,
@@ -104,6 +132,8 @@ export const useTaskStore = create<TaskState>()(
         if (taskToDelete?.notificationId) {
           await cancelTaskNotification(taskToDelete.notificationId);
         }
+
+        get().addLog("DELETE", `Deleted task "${taskToDelete?.title}"`);
 
         set((state) => ({
           tasks: state.tasks.filter((task) => task.taskId !== id),
